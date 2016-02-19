@@ -119,22 +119,19 @@ class IndexService(
               // Index service can issue redirects temporarily, and HttpClient won't follow them, so treat
               // them as generic errors that can be retried
               throw new IndexServiceTransientException(
-                "Service[%s] temporarily unreachable: %s %s" format
-                  (environment.indexService, code, response.status.reason)
+                s"Service[${environment.indexService}] at ${req.host.getOrElse("unknown")} [${req.path}] temporarily unreachable: $code ${response.status.reason}"
               )
 
             case code if code / 100 == 5 =>
               // Server-side errors can be retried
               throw new IndexServiceTransientException(
-                "Service[%s] call failed with status: %s %s" format
-                  (environment.indexService, code, response.status.reason)
+                s"Service[${environment.indexService}] at ${req.host.getOrElse("unknown")} [${req.path}] call failed with status: $code ${response.status.reason}"
               )
 
             case code =>
               // All other responses should not be retried (including non-404 client errors)
               throw new IndexServicePermanentException(
-                "Service[%s] call failed with status: %s %s" format
-                  (environment.indexService, code, response.status.reason)
+                s"Service[${environment.indexService}] at ${req.host.getOrElse("unknown")} [${req.path}] call failed with status: $code ${response.status.reason}"
               )
           }
       }
